@@ -11,8 +11,8 @@ using Picturinho.Entities;
 using Picturinho.Helpers;
 using Picturinho.Services.Contracts;
 using Picturinho.Services.Implementations;
-using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Picturinho
 {
@@ -33,8 +33,8 @@ namespace Picturinho
             services.Configure<AppSettings>(appSettingsSection);
 
             // configure jwt authentication
-            var appSettings = appSettingsSection.Get<AppSettings>();
-            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            AppSettings appSettings = appSettingsSection.Get<AppSettings>();
+            byte[] key = Encoding.ASCII.GetBytes(appSettings.Secret);
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -42,6 +42,21 @@ namespace Picturinho
             })
             .AddJwtBearer(x =>
             {
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        IUserService userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                        int userId = int.Parse(context.Principal.Identity.Name);
+                        User user = userService.GetByIdAsync(userId).GetAwaiter().GetResult();
+                        if (user == null)
+                        {
+                            // return unauthorized if user no longer exists
+                            context.Fail("Unauthorized");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
                 x.RequireHttpsMetadata = false;
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
@@ -49,18 +64,16 @@ namespace Picturinho
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
-                    ValidateAudience = false,
-                    // set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-                    ClockSkew = TimeSpan.Zero
+                    ValidateAudience = false
                 };
             });
 
             // configure database
-            services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
-            //services.AddDbContext<DataContext>(options =>
-            //    options.UseSqlServer(appSettings.ConnectionString));
+            services.AddDbContext<DataContext>(options =>
+                options.UseSqlServer(appSettings.ConnectionString));
+
             services.AddCors();
-            services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
+            services.AddControllers();
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
@@ -75,10 +88,8 @@ namespace Picturinho
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
         {
-            // add hardcoded test user to db on startup,
-            // plain text password is used for simplicity, hashed passwords should be used in production applications
-            context.Users.Add(new User { FirstName = "Test", LastName = "User", Username = "test", Password = "test" });
-            context.SaveChanges();
+            // migrate any database changes on startup (includes initial db creation)
+            context.Database.Migrate();
 
             if (env.IsDevelopment())
             {

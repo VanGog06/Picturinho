@@ -1,122 +1,157 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Picturinho.Entities;
+using Picturinho.Helpers;
 using Picturinho.Models;
+using Picturinho.Models.User;
 using Picturinho.Services.Contracts;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Picturinho.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService userService;
+        private readonly AppSettings appSettings;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IOptions<AppSettings> appSettings)
         {
             this.userService = userService;
+            this.appSettings = appSettings.Value;
         }
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync([FromBody] AuthenticateRequest model)
+        public async Task<ActionResult> AuthenticateAsync([FromBody] AuthenticateModel model)
         {
-            AuthenticateResponse response = await this.userService.AuthenticateAsync(model, this.ipAddress());
+            User user = await userService.AuthenticateAsync(model.Username, model.Password);
 
-            if (response == null)
+            if (user == null)
             {
-                return this.BadRequest(new { message = "Username or password is incorrect" });
+                return BadRequest(new { message = "Username or password is incorrect" });
             }
 
-            this.setTokenCookie(response.RefreshToken);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.UTF8.GetBytes(appSettings.Secret);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, user.Id.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
 
-            return this.Ok(response);
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string tokenString = tokenHandler.WriteToken(token);
+
+            return Ok(new
+            {
+                user.Id,
+                user.Username,
+                user.FirstName,
+                user.LastName,
+                Token = tokenString
+            });
         }
 
         [AllowAnonymous]
-        [HttpPost("refresh-token")]
-        public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync()
+        [HttpPost("register")]
+        public async Task<ActionResult> RegisterAsync([FromBody] RegisterModel model)
         {
-            string refreshToken = this.Request.Cookies["refreshToken"];
-            AuthenticateResponse response = await this.userService.RefreshTokenAsync(refreshToken, this.ipAddress());
-
-            if (response == null)
+            // TODO: Replace with automapper when set
+            User user = new User
             {
-                return this.Unauthorized(new { message = "Invalid token" });
-            }
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Username = model.Username
+            };
 
-            this.setTokenCookie(response.RefreshToken);
-
-            return this.Ok(response);
-        }
-
-        [HttpPost("revoke-token")]
-        public async Task<ActionResult> RevokeTokenAsync([FromBody] RevokeTokenRequest model)
-        {
-            string token = model.Token ?? Request.Cookies["refreshToken"];
-
-            if (string.IsNullOrEmpty(token))
+            try
             {
-                return this.BadRequest(new { message = "Token is required" });
+                await userService.CreateAsync(user, model.Password);
+                return Ok();
             }
-
-            bool response = await this.userService.RevokeTokenAsync(token, this.ipAddress());
-
-            if (!response)
+            catch (AppException ex)
             {
-                return this.NotFound(new { message = "Token not found" });
+                return BadRequest(new { message = ex.Message });
             }
-
-            return this.Ok(new { message = "Token revoked" });
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<User>> GetAll()
+        public ActionResult<IEnumerable<UserModel>> GetAll()
         {
-            IEnumerable<User> users = this.userService.GetAll();
-            return this.Ok(users);
+            IEnumerable<User> users = userService.GetAll();
+
+            // TODO: Replace with automapper when set
+            IEnumerable<UserModel> model = users.Select(u => new UserModel
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Username = u.LastName
+            });
+
+            return Ok(model);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetByIdAsync(int id)
+        public async Task<ActionResult<UserModel>> GetByIdAsync([FromRoute] int id)
         {
-            User user = await this.userService.GetByIdAsync(id);
-            return this.Ok(user);
-        }
+            User user = await userService.GetByIdAsync(id);
 
-        [HttpGet("{id}/refresh-tokens")]
-        public async Task<ActionResult<List<RefreshToken>>> GetRefreshTokensAsync(int id)
-        {
-            User user = await this.userService.GetByIdAsync(id);
-            return this.Ok(user.RefreshTokens);
-        }
-
-        private void setTokenCookie(string token)
-        {
-            CookieOptions cookieOptions = new CookieOptions
+            // TODO: Replace with automapper when set
+            UserModel model = new UserModel
             {
-                HttpOnly = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Username = user.LastName
             };
-            this.Response.Cookies.Append("refreshToken", token, cookieOptions);
+
+            return Ok(model);
         }
 
-        private string ipAddress()
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateModel model)
         {
-            if (this.Request.Headers.ContainsKey("X-Forwarded-For"))
+            // TODO: Replace with automapper when set
+            User user = new User
             {
-                return this.Request.Headers["X-Forwarded-For"];
-            }
-            else
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Username = model.Username
+            };
+            user.Id = id;
+
+            try
             {
-                return this.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+                await userService.UpdateAsync(user, model.Password);
+                return Ok();
             }
+            catch (AppException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteAsync([FromRoute] int id)
+        {
+            await userService.DeleteAsync(id);
+            return Ok();
         }
     }
 }

@@ -8,14 +8,16 @@ namespace Picturinho.Services.Contracts
 {
     public interface IUserService
     {
-        Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest model, string ipAddress);
-
-        Task<AuthenticateResponse> RefreshTokenAsync(string token, string ipAddress);
-
-        Task<bool> RevokeTokenAsync(string token, string ipAddress);
+        Task<User> AuthenticateAsync(string username, string password);
 
         IEnumerable<User> GetAll();
 
         Task<User> GetByIdAsync(int id);
+
+        Task<User> CreateAsync(User user, string password);
+
+        Task UpdateAsync(User userParam, string password = null);
+
+        Task DeleteAsync(int id);
     }
 }

@@ -1,17 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Picturinho.Entities;
 using Picturinho.Helpers;
-using Picturinho.Models;
 using Picturinho.Services.Contracts;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,140 +16,152 @@ namespace Picturinho.Services.Implementations
     public class UserService : IUserService
     {
         private readonly DataContext db;
-        private readonly AppSettings appSettings;
         private readonly ILogger logger;
 
-        public UserService(DataContext db, IOptions<AppSettings> appSettings, ILogger<UserService> logger)
+        public UserService(DataContext db, ILogger<UserService> logger)
         {
             this.db = db;
-            this.appSettings = appSettings.Value;
             this.logger = logger;
         }
 
-        public async Task<AuthenticateResponse> AuthenticateAsync(AuthenticateRequest model, string ipAddress)
+        public async Task<User> AuthenticateAsync(string username, string password)
         {
-            this.logger.LogInformation($"Retrieving {nameof(User)} with {nameof(model.Username)} = {model.Username} from the database");
-            User user = await this.db.Users.SingleOrDefaultAsync(u => u.Username == model.Username && u.Password == model.Password);
-
-            if (user == null)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                this.logger.LogError($"{nameof(User)} with {nameof(model.Username)} = {model.Username} not found");
                 return null;
             }
 
-            this.logger.LogInformation($"Generating JWT token for {nameof(model.Username)} = {model.Username}");
-            string jwtToken = this.generateJwtToken(user);
+            User user = await db.Users.SingleOrDefaultAsync(u => u.Username == username);
 
-            this.logger.LogInformation($"Generating {nameof(RefreshToken)} for {nameof(model.Username)} = {model.Username}");
-            RefreshToken refreshToken = this.generateRefreshToken(ipAddress);
+            if (user == null)
+            {
+                return null;
+            }
 
-            user.RefreshTokens.Add(refreshToken);
+            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
+                return null;
+            }
 
-            this.logger.LogInformation($"Updating {nameof(User)} entity");
-            this.db.Update(user);
-            await this.db.SaveChangesAsync();
-
-            return new AuthenticateResponse(user, jwtToken, refreshToken.Token);
+            return user;
         }
 
         public IEnumerable<User> GetAll()
         {
-            return this.db.Users;
+            return db.Users;
         }
 
         public async Task<User> GetByIdAsync(int id)
         {
-            return await this.db.Users.FindAsync(id);
+            return await db.Users.FindAsync(id);
         }
 
-        public async Task<AuthenticateResponse> RefreshTokenAsync(string token, string ipAddress)
+        public async Task<User> CreateAsync(User user, string password)
         {
-            this.logger.LogInformation($"Retrieving {nameof(User)} with {nameof(RefreshToken)} = {token}");
-            User user = await this.db.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new AppException("Password is required");
+            }
+
+            if (db.Users.Any(u => u.Username == user.Username))
+            {
+                throw new AppException($"Username \"{user.Username}\" is already taken");
+            }
+
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+            user.PasswordHash = passwordHash;
+            user.PasswordSalt = passwordSalt;
+
+            await db.Users.AddAsync(user);
+            await db.SaveChangesAsync();
+
+            return user;
+        }
+
+        public async Task UpdateAsync(User userParam, string password = null)
+        {
+            User user = await db.Users.FindAsync(userParam.Id);
 
             if (user == null)
             {
-                this.logger.LogError($"{nameof(User)} with with {nameof(RefreshToken)} = {token} not found");
-                return null;
+                throw new AppException("User not found");
             }
 
-            RefreshToken refreshToken = user.RefreshTokens.Single(x => x.Token == token);
-
-            if (!refreshToken.IsActive)
+            if (!string.IsNullOrWhiteSpace(userParam.Username) && userParam.Username != user.Username)
             {
-                this.logger.LogError($"Retrieved {nameof(RefreshToken)} is not active");
-                return null;
+                if (db.Users.Any(u => u.Username == userParam.Username))
+                {
+                    throw new AppException($"Username {user.Username} is already taken");
+                }
+
+                user.Username = userParam.Username;
             }
 
-            this.logger.LogInformation($"Generating new {nameof(RefreshToken)} and adding it to {nameof(User)} {nameof(User.RefreshTokens)}");
-            RefreshToken newRefreshToken = this.generateRefreshToken(ipAddress);
-            refreshToken.Revoked = DateTimeOffset.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
-            refreshToken.ReplacedByToken = newRefreshToken.Token;
-            user.RefreshTokens.Add(newRefreshToken);
+            if (!string.IsNullOrWhiteSpace(userParam.FirstName))
+            {
+                user.FirstName = userParam.FirstName;
+            }
 
-            this.logger.LogInformation($"Updating {nameof(User)} entity");
-            this.db.Update(user);
-            await this.db.SaveChangesAsync();
+            if (!string.IsNullOrWhiteSpace(userParam.LastName))
+            {
+                user.LastName = userParam.LastName;
+            }
 
-            this.logger.LogInformation("Generating new JWT token");
-            string jwtToken = this.generateJwtToken(user);
-            return new AuthenticateResponse(user, jwtToken, newRefreshToken.Token);
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+            }
+
+            db.Users.Update(user);
+            await db.SaveChangesAsync();
         }
 
-        public async Task<bool> RevokeTokenAsync(string token, string ipAddress)
+        public async Task DeleteAsync(int id)
         {
-            User user = await this.db.Users.SingleOrDefaultAsync(u => u.RefreshTokens.Any(t => t.Token == token));
-
-            if (user == null)
+            User user = await db.Users.FindAsync(id);
+            if (user != null)
             {
-                return false;
+                db.Users.Remove(user);
+                await db.SaveChangesAsync();
             }
+        }
 
-            RefreshToken refreshToken = user.RefreshTokens.Single(t => t.Token == token);
+        private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            if (password == null) throw new ArgumentNullException("password");
+            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
 
-            refreshToken.Revoked = DateTimeOffset.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
+            using (HMACSHA512 hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            }
+        }
 
-            this.db.Update(user);
-            await this.db.SaveChangesAsync();
+        private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        {
+            if (password == null) throw new ArgumentNullException("password");
+            if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
+            if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
+            if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
+
+            using (HMACSHA512 hmac = new HMACSHA512(storedSalt))
+            {
+                byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i])
+                    {
+                        return false;
+                    }
+                }
+            }
 
             return true;
-        }
-
-        private string generateJwtToken(User user)
-        {
-            this.logger.LogInformation($"Generating JWT token for {nameof(User)} with {nameof(user.Username)} = {user.Username}");
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            byte[] key = Encoding.ASCII.GetBytes(this.appSettings.Secret);
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-
-        private RefreshToken generateRefreshToken(string ipAddress)
-        {
-            this.logger.LogInformation($"Generating {nameof(RefreshToken)} for {nameof(ipAddress)} = {ipAddress}");
-            using (RNGCryptoServiceProvider rngCryptoServiceProvider = new RNGCryptoServiceProvider())
-            {
-                byte[] randomBytes = new byte[64];
-                rngCryptoServiceProvider.GetBytes(randomBytes);
-                return new RefreshToken
-                {
-                    Token = Convert.ToBase64String(randomBytes),
-                    Expires = DateTimeOffset.UtcNow.AddDays(7),
-                    Created = DateTimeOffset.UtcNow,
-                    CreatedByIp = ipAddress
-                };
-            }
         }
     }
 }
