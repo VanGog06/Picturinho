@@ -101,7 +101,7 @@ namespace Picturinho.Controllers
                 Id = u.Id,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
-                Username = u.LastName
+                Username = u.Username
             });
 
             return Ok(model);
