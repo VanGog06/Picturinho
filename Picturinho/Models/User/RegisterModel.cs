@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Picturinho.Common.Mapping;
+using System.ComponentModel.DataAnnotations;
 
 namespace Picturinho.Models
 {
-    public class RegisterModel
+    public class RegisterModel : IMapTo<Entities.User>
     {
         [Required]
         public string FirstName { get; set; }

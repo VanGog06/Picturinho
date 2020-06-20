@@ -1,6 +1,8 @@
-﻿namespace Picturinho.Models
+﻿using Picturinho.Common.Mapping;
+
+namespace Picturinho.Models
 {
-    public class UpdateModel
+    public class UpdateModel : IMapTo<Entities.User>
     {
         public string FirstName { get; set; }
 

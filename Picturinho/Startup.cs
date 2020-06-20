@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -77,6 +78,8 @@ namespace Picturinho
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+
+            services.AddAutoMapper(this.GetType());
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

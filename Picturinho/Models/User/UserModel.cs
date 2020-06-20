@@ -1,6 +1,8 @@
-﻿namespace Picturinho.Models.User
+﻿using Picturinho.Common.Mapping;
+
+namespace Picturinho.Models.User
 {
-    public class UserModel
+    public class UserModel : IMapFrom<Entities.User>
     {
         public int Id { get; set; }
 

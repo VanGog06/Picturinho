@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -24,11 +25,13 @@ namespace Picturinho.Controllers
     {
         private readonly IUserService userService;
         private readonly AppSettings appSettings;
+        private readonly IMapper mapper;
 
-        public UsersController(IUserService userService, IOptions<AppSettings> appSettings)
+        public UsersController(IUserService userService, IOptions<AppSettings> appSettings, IMapper mapper)
         {
             this.userService = userService;
             this.appSettings = appSettings.Value;
+            this.mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -71,13 +74,7 @@ namespace Picturinho.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> RegisterAsync([FromBody] RegisterModel model)
         {
-            // TODO: Replace with automapper when set
-            User user = new User
-            {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Username = model.Username
-            };
+            User user = mapper.Map<User>(model);
 
             try
             {
@@ -94,15 +91,7 @@ namespace Picturinho.Controllers
         public ActionResult<IEnumerable<UserModel>> GetAll()
         {
             IEnumerable<User> users = userService.GetAll();
-
-            // TODO: Replace with automapper when set
-            IEnumerable<UserModel> model = users.Select(u => new UserModel
-            {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                Username = u.Username
-            });
+            IEnumerable<UserModel> model = mapper.Map<IEnumerable<UserModel>>(users);
 
             return Ok(model);
         }
@@ -111,15 +100,7 @@ namespace Picturinho.Controllers
         public async Task<ActionResult<UserModel>> GetByIdAsync([FromRoute] int id)
         {
             User user = await userService.GetByIdAsync(id);
-
-            // TODO: Replace with automapper when set
-            UserModel model = new UserModel
-            {
-                Id = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Username = user.LastName
-            };
+            UserModel model = mapper.Map<UserModel>(user);
 
             return Ok(model);
         }
@@ -127,13 +108,7 @@ namespace Picturinho.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateModel model)
         {
-            // TODO: Replace with automapper when set
-            User user = new User
-            {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Username = model.Username
-            };
+            User user = mapper.Map<User>(model);
             user.Id = id;
 
             try
