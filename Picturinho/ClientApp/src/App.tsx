@@ -5,6 +5,7 @@ import { Alert } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 
+import { Footer } from './components/common/footer/Footer';
 import { Header } from './components/common/Header';
 import { PrivateRoute } from './components/common/PrivateRoute';
 import { Home } from './components/home/Home';
@@ -33,6 +34,7 @@ function App() {
           </div>
         </div>
       </div>
+      <Footer />
     </BrowserRouter>
   );
 }
