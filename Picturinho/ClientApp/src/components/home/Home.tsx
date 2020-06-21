@@ -12,7 +12,7 @@ export const Home: React.FC = () => {
 
   useEffect(() => {
     dispatch(getAll());
-  }, []);
+  }, [dispatch]);
 
   function handleDeleteUser(id: number) {
     dispatch(deleteUser(id));

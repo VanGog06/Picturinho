@@ -1,12 +1,11 @@
-﻿using Picturinho.Entities;
-using Picturinho.Models;
-using System.Collections;
+﻿using Picturinho.Common.Services;
+using Picturinho.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Picturinho.Services.Contracts
 {
-    public interface IUserService
+    public interface IUserService : IScopedService
     {
         Task<User> AuthenticateAsync(string username, string password);
 

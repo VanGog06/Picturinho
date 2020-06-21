@@ -1,5 +1,3 @@
-import { useHistory } from 'react-router-dom';
-
 import { logout } from '../store/user/UserActions';
 
 export const handleResponse = (response: Response) => {

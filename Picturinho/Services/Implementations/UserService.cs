@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
+using Picturinho.Common.Services;
 using Picturinho.Entities;
 using Picturinho.Helpers;
 using Picturinho.Services.Contracts;

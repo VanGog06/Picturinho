@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Picturinho.Common.Infrastructure;
 using Picturinho.Entities;
 using Picturinho.Helpers;
 using Picturinho.Services.Contracts;
@@ -76,9 +77,7 @@ namespace Picturinho
             services.AddCors();
             services.AddControllers();
 
-            // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
-
+            services.AddConventionalServices();
             services.AddAutoMapper(this.GetType());
 
             // In production, the React files will be served from this directory

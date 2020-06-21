@@ -19,7 +19,7 @@ export const Login: React.FC = () => {
   // reset login status
   useEffect(() => {
     dispatch(logout());
-  }, []);
+  }, [dispatch]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
