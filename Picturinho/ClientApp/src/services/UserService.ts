@@ -4,7 +4,10 @@ import { RegisterUserModel } from '../models/user/RegisterUserModel';
 import { UserModel } from '../models/user/UserModel';
 
 export class UserService {
-  public static login(username: string, password: string): Promise<UserModel> {
+  public static async login(
+    username: string,
+    password: string
+  ): Promise<UserModel> {
     const requestOptions: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -21,7 +24,7 @@ export class UserService {
       });
   }
 
-  public static register(user: RegisterUserModel): Promise<void> {
+  public static async register(user: RegisterUserModel): Promise<void> {
     const requestOptions: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -35,7 +38,7 @@ export class UserService {
     localStorage.removeItem("user");
   }
 
-  public static getAll(): Promise<UserModel[]> {
+  public static async getAll(): Promise<UserModel[]> {
     const requestOptions: RequestInit = {
       method: "GET",
     };
@@ -48,7 +51,7 @@ export class UserService {
     return fetch("/users", requestOptions).then(handleResponse);
   }
 
-  public static deleteUser(id: number): Promise<void> {
+  public static async deleteUser(id: number): Promise<void> {
     const requestOptions: RequestInit = {
       method: "DELETE",
     };

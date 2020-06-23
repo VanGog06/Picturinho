@@ -1,5 +1,5 @@
 import React from 'react';
-import { Nav, Navbar } from 'react-bootstrap';
+import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -21,6 +21,14 @@ export const Header: React.FC = (): JSX.Element => {
           <Nav.Link as={Link} to="/home">
             Home
           </Nav.Link>
+          <NavDropdown title="Albums" id="albums">
+            <NavDropdown.Item as={Link} to="/albums">
+              View
+            </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/albums/create">
+              Create
+            </NavDropdown.Item>
+          </NavDropdown>
         </Nav>
         <Nav>
           {user ? (

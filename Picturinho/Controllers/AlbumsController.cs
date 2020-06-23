@@ -11,16 +11,16 @@ namespace Picturinho.Controllers
     [Route("[controller]")]
     [ApiController]
     [Authorize]
-    public class AlbumController : ControllerBase
+    public class AlbumsController : ControllerBase
     {
         private readonly IAlbumService albumService;
 
-        public AlbumController(IAlbumService albumService)
+        public AlbumsController(IAlbumService albumService)
         {
             this.albumService = albumService;
         }
 
-        [HttpGet("albums/{userId:int}")]
+        [HttpGet("{userId:int}")]
         public async Task<ActionResult<IEnumerable<AlbumModel>>> GetAsync([FromRoute] int userId)
         {
             IEnumerable<AlbumModel> userAlbums = await albumService.GetUserAlbumsAsync(userId);

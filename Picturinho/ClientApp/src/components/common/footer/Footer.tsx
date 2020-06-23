@@ -9,6 +9,7 @@ export const Footer: React.FC = (): JSX.Element => (
       className={styles.footer__link}
       href="https://github.com/VanGog06"
       target="_blank"
+      rel="noopener noreferrer"
     >
       Georgi Stankov
     </a>
