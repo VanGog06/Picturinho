@@ -31,6 +31,13 @@ export const authenticationReducer = (
         loggedIn: false,
         user: {},
       };
+    case UserActionTypes.LOGOUT:
+      return {
+        ...state,
+        loggingIn: false,
+        loggedIn: false,
+        user: {},
+      };
     default:
       return { ...state };
   }

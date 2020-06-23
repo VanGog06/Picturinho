@@ -1,7 +1,6 @@
 import React, { Dispatch, useEffect, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { AlbumModel } from '../../models/album/AlbumModel';
 import { UserModel } from '../../models/user/UserModel';
@@ -12,7 +11,6 @@ import styles from './Albums.module.scss';
 
 export const Albums: React.FC = (): JSX.Element => {
   const dispatch = useDispatch<Dispatch<AlertActions>>();
-  const history = useHistory<History>();
   const user: UserModel | undefined = useSelector(
     (state: any) => state.authentication?.user
   );

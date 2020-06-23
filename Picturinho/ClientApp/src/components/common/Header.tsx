@@ -21,17 +21,19 @@ export const Header: React.FC = (): JSX.Element => {
           <Nav.Link as={Link} to="/home">
             Home
           </Nav.Link>
-          <NavDropdown title="Albums" id="albums">
-            <NavDropdown.Item as={Link} to="/albums">
-              View
-            </NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/albums/create">
-              Create
-            </NavDropdown.Item>
-          </NavDropdown>
+          {user && user.username ? (
+            <NavDropdown title="Albums" id="albums">
+              <NavDropdown.Item as={Link} to="/albums">
+                View
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/albums/create">
+                Create
+              </NavDropdown.Item>
+            </NavDropdown>
+          ) : undefined}
         </Nav>
         <Nav>
-          {user ? (
+          {user && user.username ? (
             <>
               <Nav.Link as={Link} to="/">
                 {user.username}

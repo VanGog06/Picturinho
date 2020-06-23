@@ -14,7 +14,11 @@ export const Home: React.FC = () => {
     dispatch(getAll());
   }, [dispatch]);
 
-  function handleDeleteUser(id: number) {
+  function handleDeleteUser(
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    id: number
+  ): void {
+    event.preventDefault();
     dispatch(deleteUser(id));
   }
 
@@ -39,8 +43,11 @@ export const Home: React.FC = () => {
                   {" "}
                   -{" "}
                   <a
-                    onClick={() => handleDeleteUser(user.id)}
+                    onClick={(
+                      event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+                    ) => handleDeleteUser(event, user.id)}
                     className="text-primary"
+                    href=""
                   >
                     Delete
                   </a>
