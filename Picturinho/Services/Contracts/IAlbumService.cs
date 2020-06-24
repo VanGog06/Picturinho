@@ -7,6 +7,8 @@ namespace Picturinho.Services.Contracts
 {
     public interface IAlbumService : IScopedService
     {
+        Task<AlbumWithImagesModel> GetByIdAsync(int albumId);
+
         Task<IEnumerable<AlbumModel>> GetUserAlbumsAsync(int userId);
 
         Task<AlbumModel> CreateAlbumAsync(AlbumModel model);

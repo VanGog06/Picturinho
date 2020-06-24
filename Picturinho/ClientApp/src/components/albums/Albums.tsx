@@ -36,7 +36,7 @@ export const Albums: React.FC = (): JSX.Element => {
         setShowSpinner(false);
       }
     })();
-  }, []);
+  }, [dispatch, user]);
 
   return (
     <>
@@ -48,11 +48,7 @@ export const Albums: React.FC = (): JSX.Element => {
       ) : (
         <div className={styles.albums}>
           {albums.map((album: AlbumModel) => (
-            <Album
-              key={album.name}
-              name={album.name}
-              description={album.description}
-            />
+            <Album key={album.name} album={album} />
           ))}
         </div>
       )}

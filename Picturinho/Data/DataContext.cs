@@ -12,5 +12,7 @@ namespace Picturinho.Helpers
         public DbSet<User> Users { get; set; }
 
         public DbSet<Album> Albums { get; set; }
+
+        public DbSet<Image> Images { get; set; }
     }
 }

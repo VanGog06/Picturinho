@@ -1,4 +1,5 @@
+import { AlbumModel } from '../../../models/album/AlbumModel';
+
 export interface IAlbumProps {
-  name: string;
-  description: string;
+  album: AlbumModel;
 }

@@ -38,6 +38,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20200621104333_Albums.cs" />
     <Compile Remove="Migrations\20200621104333_Albums.Designer.cs" />
+    <Compile Remove="Migrations\20200624112835_ImageEntity.cs" />
+    <Compile Remove="Migrations\20200624112835_ImageEntity.Designer.cs" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

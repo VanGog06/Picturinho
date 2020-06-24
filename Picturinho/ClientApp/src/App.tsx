@@ -7,6 +7,7 @@ import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { Albums } from './components/albums/Albums';
 import { CreateAlbum } from './components/albums/create/CreateAlbum';
+import { AlbumDetails } from './components/albums/details/AlbumDetails';
 import { Footer } from './components/common/footer/Footer';
 import { Header } from './components/common/Header';
 import { PrivateRoute } from './components/common/PrivateRoute';
@@ -32,7 +33,8 @@ function App() {
               <Route path="/login" component={Login} />
               <Route path="/register" component={Register} />
               <PrivateRoute path="/albums/create" component={CreateAlbum} />
-              <Route path="/albums" component={Albums} />
+              <PrivateRoute path="/albums/:id" component={AlbumDetails} />
+              <PrivateRoute path="/albums" component={Albums} />
               <Redirect from="*" to="/" />
             </Switch>
           </div>

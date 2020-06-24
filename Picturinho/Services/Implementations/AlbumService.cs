@@ -25,6 +25,20 @@ namespace Picturinho.Services.Implementations
             this.mapper = mapper;
         }
 
+        public async Task<AlbumWithImagesModel> GetByIdAsync(int albumId)
+        {
+            this.logger.LogInformation($"Retrieving {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+            Album album = await db.Albums.FindAsync(albumId);
+
+            if (album == null)
+            {
+                this.logger.LogInformation($"{nameof(Album)} with {nameof(Album.Id)} = {albumId} was not found");
+                return null;
+            }
+
+            return mapper.Map<AlbumWithImagesModel>(album);
+        }
+
         public async Task<IEnumerable<AlbumModel>> GetUserAlbumsAsync(int userId)
         {
             this.logger.LogInformation($"Getting all {nameof(Album)} records for {nameof(User)} with {nameof(User.Id)} = {userId}");
