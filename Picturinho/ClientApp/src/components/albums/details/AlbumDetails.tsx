@@ -1,6 +1,6 @@
 import { uniqueId } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Carousel, Spinner } from 'react-bootstrap';
+import { Spinner } from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -39,21 +39,31 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
           imagePromises.push(imagePromise);
         }
 
-        const images: ImageModel[] = await Promise.all(imagePromises);
-        console.log(images);
+        const alreadyAvailalbeImages: ImageModel[] = await Promise.all(
+          imagePromises
+        );
+        const imagesForState: ImageModel[] = alreadyAvailalbeImages.map((i) => {
+          return {
+            ...i,
+            isUploading: false,
+            uniqueId: uniqueId(),
+            data: `data:image/png;base64,${i.data}`,
+          };
+        });
 
         setAlbum(retrievedAlbum);
+        setImages(imagesForState);
         setShowSpinner(false);
       } catch (error) {
         dispatch(alertError(error.message));
         setShowSpinner(false);
       }
     })();
-  }, []);
+  }, [dispatch, id]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]): void => {
-      acceptedFiles.forEach((file: File) => {
+      acceptedFiles.forEach(async (file: File) => {
         const uniqId: string = uniqueId();
 
         setImages((prevImages: ImageModel[]) => [
@@ -66,9 +76,28 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
             uniqueId: uniqId,
           },
         ]);
+
+        const uploadedImage: ImageModel = await ImageService.addImageToAlbum(
+          id,
+          file
+        );
+
+        const imagesExceptUploaded: ImageModel[] = images.filter(
+          (i) => i.uniqueId !== uniqId
+        );
+
+        setImages([
+          ...imagesExceptUploaded,
+          {
+            ...uploadedImage,
+            isUploading: false,
+            uniqueId: uniqId,
+            data: `data:image/png;base64,${uploadedImage.data}`,
+          },
+        ]);
       });
     },
-    [setImages]
+    [images, id, setImages]
   );
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({

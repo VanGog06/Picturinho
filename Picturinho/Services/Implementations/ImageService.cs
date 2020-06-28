@@ -4,6 +4,7 @@ using Picturinho.Entities;
 using Picturinho.Helpers;
 using Picturinho.Models.Image;
 using Picturinho.Services.Contracts;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Picturinho.Services.Implementations
@@ -27,6 +28,33 @@ namespace Picturinho.Services.Implementations
             Image image = await this.db.Images.FindAsync(imageId);
 
             return mapper.Map<ImageModel>(image);
+        }
+
+        public async Task<ImageModel> AddImageToAlbumAsync(CreateImageModel model)
+        {
+            int albumId = int.Parse(model.AlbumId);
+            Album album = await db.Albums.FindAsync(albumId);
+
+            if (album == null)
+            {
+                return null;
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await model.Image.CopyToAsync(ms);
+                Image image = new Image
+                {
+                    AlbumId = album.Id,
+                    Data = ms.ToArray(),
+                    Name = model.Image.FileName
+                };
+
+                await db.Images.AddAsync(image);
+                await db.SaveChangesAsync();
+
+                return mapper.Map<ImageModel>(image);
+            }
         }
     }
 }

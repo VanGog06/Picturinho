@@ -28,7 +28,7 @@ namespace Picturinho.Services.Implementations
         public async Task<AlbumWithImagesModel> GetByIdAsync(int albumId)
         {
             this.logger.LogInformation($"Retrieving {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
-            Album album = await db.Albums.FindAsync(albumId);
+            Album album = await db.Albums.Include(a => a.Images).FirstOrDefaultAsync(a => a.Id == albumId);
 
             if (album == null)
             {

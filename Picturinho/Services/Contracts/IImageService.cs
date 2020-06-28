@@ -7,5 +7,7 @@ namespace Picturinho.Services.Contracts
     public interface IImageService : IScopedService
     {
         Task<ImageModel> GetImageAsync(int imageId);
+
+        Task<ImageModel> AddImageToAlbumAsync(CreateImageModel model);
     }
 }
