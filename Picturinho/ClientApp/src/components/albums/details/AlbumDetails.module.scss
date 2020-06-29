@@ -33,9 +33,13 @@
     flex-wrap: wrap;
     padding: 0 15px;
 
-    &__image {
+    &__container {
       width: 30%;
       margin-bottom: 25px;
+
+      &__image {
+        width: 100%;
+      }
     }
   }
 }

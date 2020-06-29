@@ -1,6 +1,6 @@
 import { uniqueId } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { ProgressBar, Spinner } from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -114,12 +114,15 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
 
       <div className={styles.details__images}>
         {images.map((i) => (
-          <img
-            className={styles.details__images__image}
-            key={i.uniqueId}
-            src={i.data}
-            alt={i.name}
-          />
+          <div key={i.uniqueId} className={styles.details__images__container}>
+            <img
+              className={styles.details__images__container__image}
+              src={i.data}
+              alt={i.name}
+            />
+
+            {i.isUploading && <ProgressBar animated now={100} />}
+          </div>
         ))}
       </div>
 
