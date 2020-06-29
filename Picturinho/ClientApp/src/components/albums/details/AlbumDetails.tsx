@@ -2,7 +2,6 @@ import { uniqueId } from 'lodash';
 import { MDBIcon } from 'mdbreact';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ProgressBar, Spinner } from 'react-bootstrap';
-import { useDropzone } from 'react-dropzone';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Dispatch } from 'redux';
@@ -13,6 +12,7 @@ import { ImageModel } from '../../../models/image/ImageModel';
 import { AlbumService } from '../../../services/AlbumService';
 import { ImageService } from '../../../services/ImageService';
 import { AlertActions, alertError } from '../../../store/alert/AlertActions';
+import { Upload } from '../upload/Upload';
 import styles from './AlbumDetails.module.scss';
 
 export const AlbumDetails: React.FC = (): JSX.Element => {
@@ -97,7 +97,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
         });
       }
     },
-    [images, id, setImages]
+    [id, setImages]
   );
 
   const addSelectedImage = useCallback(
@@ -107,7 +107,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
         imageUniqueId,
       ]);
     },
-    [selectedImages, setSelectedImages]
+    [setSelectedImages]
   );
 
   const removeSelectedImage = useCallback(
@@ -119,10 +119,6 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
     },
     [selectedImages, setSelectedImages]
   );
-
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
-    onDrop,
-  });
 
   return showSpinner && !album ? (
     <Spinner animation="border" variant="dark" role="status">
@@ -156,12 +152,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
         ))}
       </div>
 
-      <section className="container">
-        <div {...getRootProps({ className: styles.details__dropzone })}>
-          <input {...getInputProps()} />
-          <p>Drag and drop image(s) here, or click to select some</p>
-        </div>
-      </section>
+      <Upload onDrop={onDrop} />
     </div>
   );
 };
