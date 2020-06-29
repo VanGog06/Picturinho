@@ -1,4 +1,5 @@
 import { uniqueId } from 'lodash';
+import { MDBIcon } from 'mdbreact';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ProgressBar, Spinner } from 'react-bootstrap';
 import { useDropzone } from 'react-dropzone';
@@ -21,6 +22,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
   const [album, setAlbum] = useState<AlbumModel>();
   const [images, setImages] = useState<ImageModel[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -100,6 +102,26 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
     [images, id, setImages]
   );
 
+  const addSelectedImage = useCallback(
+    (imageUniqueId: string): void => {
+      setSelectedImages((prevSelectedImages: string[]) => [
+        ...prevSelectedImages,
+        imageUniqueId,
+      ]);
+    },
+    [selectedImages, setSelectedImages]
+  );
+
+  const removeSelectedImage = useCallback(
+    (imageUniqueId: string): void => {
+      const newSelectedImages: string[] = selectedImages.filter(
+        (si) => si !== imageUniqueId
+      );
+      setSelectedImages(newSelectedImages);
+    },
+    [selectedImages, setSelectedImages]
+  );
+
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop,
   });
@@ -119,7 +141,17 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
               className={styles.details__images__container__image}
               src={i.data}
               alt={i.name}
+              onClick={() => addSelectedImage(i.uniqueId)}
             />
+
+            {selectedImages.indexOf(i.uniqueId) !== -1 && (
+              <div
+                onClick={() => removeSelectedImage(i.uniqueId)}
+                className={styles.selectedImage}
+              >
+                <MDBIcon icon="check" />
+              </div>
+            )}
 
             {i.isUploading && <ProgressBar animated now={100} />}
           </div>
