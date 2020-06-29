@@ -16,6 +16,10 @@ namespace Picturinho.Entities
 
         public byte[] PasswordSalt { get; set; }
 
+        public int RoleId { get; set; }
+
+        public Role Role { get; set; }
+
         public ICollection<Album> Albums { get; set; } = new List<Album>();
     }
 }

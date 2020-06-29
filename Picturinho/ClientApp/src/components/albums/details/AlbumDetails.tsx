@@ -64,8 +64,8 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
   }, [dispatch, id]);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]): void => {
-      acceptedFiles.forEach(async (file: File) => {
+    async (acceptedFiles: File[]): Promise<void> => {
+      for (const file of acceptedFiles) {
         const uniqId: string = uniqueId();
 
         setImages((prevImages: ImageModel[]) => [
@@ -84,20 +84,18 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
           file
         );
 
-        const imagesExceptUploaded: ImageModel[] = images.filter(
-          (i) => i.uniqueId !== uniqId
-        );
-
-        setImages([
-          ...imagesExceptUploaded,
-          {
-            ...uploadedImage,
-            isUploading: false,
-            uniqueId: uniqId,
-            data: `data:image/png;base64,${uploadedImage.data}`,
-          },
-        ]);
-      });
+        setImages((prevImages: ImageModel[]) => {
+          return [
+            ...prevImages.filter((pi) => pi.uniqueId !== uniqId),
+            {
+              ...uploadedImage,
+              isUploading: false,
+              uniqueId: uniqId,
+              data: `data:image/png;base64,${uploadedImage.data}`,
+            },
+          ];
+        });
+      }
     },
     [images, id, setImages]
   );

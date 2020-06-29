@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Picturinho.Common.Services;
 using Picturinho.Entities;
+using Picturinho.Entities.Enums;
 using Picturinho.Helpers;
 using Picturinho.Services.Contracts;
 using System;
@@ -73,6 +74,15 @@ namespace Picturinho.Services.Implementations
 
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+
+            Role userRole = await db.Roles.FirstOrDefaultAsync(r => r.Name == Roles.User);
+
+            if (userRole == null)
+            {
+                throw new AppException($"User role was not found");
+            }
+
+            user.RoleId = userRole.Id;
 
             await db.Users.AddAsync(user);
             await db.SaveChangesAsync();
