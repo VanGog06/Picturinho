@@ -1,0 +1,28 @@
+.reaction {
+  padding: 0 15px;
+
+  &__icon {
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 20px;
+    margin-right: 5px;
+    &:hover {
+      cursor: pointer;
+      transform: scale(1.1, 1.1);
+    }
+  }
+
+  &__like {
+    color: #fff;
+    background-color: deepskyblue;
+  }
+
+  &__love {
+    color: #fff;
+    background-color: red;
+  }
+
+  &__laugh {
+    color: #f1c27d;
+  }
+}

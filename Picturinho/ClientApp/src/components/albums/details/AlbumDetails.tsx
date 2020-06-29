@@ -12,6 +12,7 @@ import { ImageModel } from '../../../models/image/ImageModel';
 import { AlbumService } from '../../../services/AlbumService';
 import { ImageService } from '../../../services/ImageService';
 import { AlertActions, alertError } from '../../../store/alert/AlertActions';
+import { Reaction } from '../reaction/Reaction';
 import { Upload } from '../upload/Upload';
 import styles from './AlbumDetails.module.scss';
 
@@ -152,6 +153,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
         ))}
       </div>
 
+      <Reaction />
       <Upload onDrop={onDrop} />
     </div>
   );
