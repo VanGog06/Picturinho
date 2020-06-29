@@ -65,7 +65,8 @@ namespace Picturinho.Controllers
                 user.Username,
                 user.FirstName,
                 user.LastName,
-                Token = tokenString
+                Token = tokenString,
+                Role = user.Role.Name
             });
         }
 

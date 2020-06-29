@@ -20,6 +20,14 @@ namespace Picturinho.Controllers
             this.albumService = albumService;
         }
 
+        [HttpGet]
+        public ActionResult<IEnumerable<AlbumWithImagesModel>> GetAlbums()
+        {
+            IEnumerable<AlbumWithImagesModel> albums = albumService.GetAlbums();
+
+            return Ok(albums);
+        }
+
         [HttpGet("{albumId:int}")]
         public async Task<ActionResult<AlbumWithImagesModel>> GetByIdAsync([FromRoute] int albumId)
         {

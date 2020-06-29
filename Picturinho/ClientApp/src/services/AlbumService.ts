@@ -4,6 +4,19 @@ import { AlbumModel } from '../models/album/AlbumModel';
 import { AlbumWithImagesModel } from '../models/album/AlbumWithImagesModel';
 
 export class AlbumService {
+  public static async getAlbums(): Promise<AlbumModel[]> {
+    const requestOptions: RequestInit = {
+      method: "GET",
+    };
+
+    const authenticationHeader = authHeader();
+    if (authenticationHeader) {
+      requestOptions.headers = authenticationHeader;
+    }
+
+    return fetch(`/api/albums`, requestOptions).then(handleResponse);
+  }
+
   public static async getAlbumById(
     albumId: number
   ): Promise<AlbumWithImagesModel> {

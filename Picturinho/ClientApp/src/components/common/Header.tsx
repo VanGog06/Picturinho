@@ -22,14 +22,19 @@ export const Header: React.FC = (): JSX.Element => {
             Home
           </Nav.Link>
           {user && user.username ? (
-            <NavDropdown title="Albums" id="albums">
-              <NavDropdown.Item as={Link} to="/albums">
-                View
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/albums/create">
-                Create
-              </NavDropdown.Item>
-            </NavDropdown>
+            <>
+              <NavDropdown title="Albums" id="albums">
+                <NavDropdown.Item as={Link} to="/albums">
+                  View
+                </NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/albums/create">
+                  Create
+                </NavDropdown.Item>
+              </NavDropdown>
+              <Nav.Link as={Link} to="/explore">
+                Explore
+              </Nav.Link>
+            </>
           ) : undefined}
         </Nav>
         <Nav>

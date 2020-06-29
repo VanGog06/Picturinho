@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Picturinho.Entities;
@@ -23,6 +24,11 @@ namespace Picturinho.Services.Implementations
             this.db = db;
             this.logger = logger;
             this.mapper = mapper;
+        }
+
+        public IEnumerable<AlbumWithImagesModel> GetAlbums()
+        {
+            return db.Albums.ProjectTo<AlbumWithImagesModel>(mapper.ConfigurationProvider).ToList();
         }
 
         public async Task<AlbumWithImagesModel> GetByIdAsync(int albumId)

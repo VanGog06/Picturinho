@@ -11,6 +11,7 @@ import { AlbumDetails } from './components/albums/details/AlbumDetails';
 import { Footer } from './components/common/footer/Footer';
 import { Header } from './components/common/Header';
 import { PrivateRoute } from './components/common/PrivateRoute';
+import { Explore } from './components/explore/Explore';
 import { Home } from './components/home/Home';
 import { Login } from './components/login/Login';
 import { Register } from './components/register/Register';
@@ -35,6 +36,7 @@ function App() {
               <PrivateRoute path="/albums/create" component={CreateAlbum} />
               <PrivateRoute path="/albums/:id" component={AlbumDetails} />
               <PrivateRoute path="/albums" component={Albums} />
+              <PrivateRoute path="/explore" component={Explore} />
               <Redirect from="*" to="/" />
             </Switch>
           </div>
