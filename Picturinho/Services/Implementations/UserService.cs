@@ -33,7 +33,7 @@ namespace Picturinho.Services.Implementations
                 return null;
             }
 
-            User user = await db.Users.SingleOrDefaultAsync(u => u.Username == username);
+            User user = await db.Users.Include(u => u.Role).SingleOrDefaultAsync(u => u.Username == username);
 
             if (user == null)
             {

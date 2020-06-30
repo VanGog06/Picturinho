@@ -14,10 +14,6 @@ export const Reaction: React.FC = (): JSX.Element => {
         className={`${styles.reaction__icon} ${styles.reaction__love}`}
         icon="heart"
       />
-      <MDBIcon
-        className={`${styles.reaction__icon} ${styles.reaction__laugh}`}
-        icon="carrot"
-      />
     </div>
   );
 };

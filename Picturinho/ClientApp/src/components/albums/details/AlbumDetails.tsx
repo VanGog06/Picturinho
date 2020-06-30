@@ -1,17 +1,19 @@
 import { uniqueId } from 'lodash';
 import { MDBIcon } from 'mdbreact';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProgressBar, Spinner } from 'react-bootstrap';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Dispatch } from 'redux';
 
 import { AlbumModel } from '../../../models/album/AlbumModel';
 import { AlbumWithImagesModel } from '../../../models/album/AlbumWithImagesModel';
 import { ImageModel } from '../../../models/image/ImageModel';
+import { UserModel } from '../../../models/user/UserModel';
 import { AlbumService } from '../../../services/AlbumService';
 import { ImageService } from '../../../services/ImageService';
 import { AlertActions, alertError } from '../../../store/alert/AlertActions';
+import { DeleteAlbum } from '../delete/DeleteAlbum';
 import { Reaction } from '../reaction/Reaction';
 import { Upload } from '../upload/Upload';
 import styles from './AlbumDetails.module.scss';
@@ -23,7 +25,15 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
   const [showSpinner, setShowSpinner] = useState<boolean>(false);
   const [album, setAlbum] = useState<AlbumModel>();
   const [images, setImages] = useState<ImageModel[]>([]);
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageModel[]>([]);
+
+  const user: UserModel | undefined = useSelector(
+    (state: any) => state.authentication?.user
+  );
+  const isCurrentUserAlbumOwner: boolean | undefined = useMemo(
+    () => user && album && user.id === album.userId,
+    [user, album]
+  );
 
   useEffect(() => {
     (async () => {
@@ -102,19 +112,19 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
   );
 
   const addSelectedImage = useCallback(
-    (imageUniqueId: string): void => {
-      setSelectedImages((prevSelectedImages: string[]) => [
+    (imageToAdd: ImageModel): void => {
+      setSelectedImages((prevSelectedImages: ImageModel[]) => [
         ...prevSelectedImages,
-        imageUniqueId,
+        imageToAdd,
       ]);
     },
     [setSelectedImages]
   );
 
   const removeSelectedImage = useCallback(
-    (imageUniqueId: string): void => {
-      const newSelectedImages: string[] = selectedImages.filter(
-        (si) => si !== imageUniqueId
+    (imageToRemove: ImageModel): void => {
+      const newSelectedImages: ImageModel[] = selectedImages.filter(
+        (si) => si.uniqueId !== imageToRemove.uniqueId
       );
       setSelectedImages(newSelectedImages);
     },
@@ -136,12 +146,15 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
               className={styles.details__images__container__image}
               src={i.data}
               alt={i.name}
-              onClick={() => addSelectedImage(i.uniqueId)}
+              onClick={() =>
+                isCurrentUserAlbumOwner ? addSelectedImage(i) : undefined
+              }
             />
 
-            {selectedImages.indexOf(i.uniqueId) !== -1 && (
+            {selectedImages.map((si) => si.uniqueId).indexOf(i.uniqueId) !==
+              -1 && (
               <div
-                onClick={() => removeSelectedImage(i.uniqueId)}
+                onClick={() => removeSelectedImage(i)}
                 className={styles.selectedImage}
               >
                 <MDBIcon icon="check" />
@@ -153,8 +166,12 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
         ))}
       </div>
 
-      <Reaction />
-      <Upload onDrop={onDrop} />
+      <div className={styles.details__actions}>
+        <Reaction />
+        <DeleteAlbum selectedImages={selectedImages} />
+      </div>
+
+      {isCurrentUserAlbumOwner && <Upload onDrop={onDrop} />}
     </div>
   );
 };
