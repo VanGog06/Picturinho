@@ -5,7 +5,6 @@
     padding: 10px;
     border-radius: 50%;
     font-size: 20px;
-    margin-right: 5px;
     &:hover {
       cursor: pointer;
       transform: scale(1.1, 1.1);
@@ -20,5 +19,11 @@
   &__love {
     color: #fff;
     background-color: red;
+  }
+
+  &__count {
+    margin: 0 5px;
+    font-size: 20px;
+    font-weight: bold;
   }
 }

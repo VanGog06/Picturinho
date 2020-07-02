@@ -178,7 +178,7 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
       </div>
 
       <div className={styles.details__actions}>
-        {images.length > 0 && <Reaction />}
+        {images.length > 0 && <Reaction albumId={+id} />}
         <DeleteImage
           selectedImages={selectedImages}
           handleDeletedImages={handleDeletedImages}

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Picturinho.Common.Services;
 using System;
 using System.Linq;
@@ -40,6 +41,8 @@ namespace Picturinho.Common.Infrastructure
                     services.AddScoped(type.Service, type.Implementation);
                 }
             }
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             return services;
         }
