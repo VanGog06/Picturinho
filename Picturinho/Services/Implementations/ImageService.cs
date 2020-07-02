@@ -56,5 +56,14 @@ namespace Picturinho.Services.Implementations
                 return mapper.Map<ImageModel>(image);
             }
         }
+
+        public async Task<int> DeleteImageAsync(int imageId)
+        {
+            this.logger.LogInformation($"Removing {nameof(Image)} with {nameof(Image.Id)} = {imageId}");
+            db.Images.Remove(new Image { Id = imageId });
+            await db.SaveChangesAsync();
+
+            return imageId;
+        }
     }
 }

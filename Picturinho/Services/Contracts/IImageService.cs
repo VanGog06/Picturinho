@@ -9,5 +9,7 @@ namespace Picturinho.Services.Contracts
         Task<ImageModel> GetImageAsync(int imageId);
 
         Task<ImageModel> AddImageToAlbumAsync(CreateImageModel model);
+
+        Task<int> DeleteImageAsync(int imageId);
     }
 }

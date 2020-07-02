@@ -39,5 +39,13 @@ namespace Picturinho.Controllers
 
             return Ok(image);
         }
+
+        [HttpDelete("{imageId:int}")]
+        public async Task<ActionResult<int>> DeleteAsync([FromRoute] int imageId)
+        {
+            int deletedImageId = await imageService.DeleteImageAsync(imageId);
+
+            return Ok(deletedImageId);
+        }
     }
 }

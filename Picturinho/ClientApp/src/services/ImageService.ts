@@ -36,4 +36,17 @@ export class ImageService {
 
     return fetch(`/api/images`, requestOptions).then(handleResponse);
   }
+
+  public static async deleteImage(imageId: number): Promise<number> {
+    const requestOptions: RequestInit = {
+      method: "DELETE",
+    };
+
+    const authenticationHeader = authHeader();
+    if (authenticationHeader) {
+      requestOptions.headers = authenticationHeader;
+    }
+
+    return fetch(`/api/images/${imageId}`, requestOptions).then(handleResponse);
+  }
 }

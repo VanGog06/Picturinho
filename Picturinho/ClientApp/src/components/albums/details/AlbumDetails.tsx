@@ -1,4 +1,4 @@
-import { uniqueId } from 'lodash';
+import { filter, uniqueId } from 'lodash';
 import { MDBIcon } from 'mdbreact';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ProgressBar, Spinner } from 'react-bootstrap';
@@ -131,6 +131,17 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
     [selectedImages, setSelectedImages]
   );
 
+  const handleDeletedImages = useCallback(
+    (deletedImagesIds: number[]) => {
+      const newImages: ImageModel[] = filter(
+        images,
+        (i: ImageModel) => deletedImagesIds.indexOf(i.id) === -1
+      );
+      setImages(newImages);
+    },
+    [images, setImages]
+  );
+
   return showSpinner && !album ? (
     <Spinner animation="border" variant="dark" role="status">
       <span className="sr-only">Loading album with id = {id}</span>
@@ -167,8 +178,11 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
       </div>
 
       <div className={styles.details__actions}>
-        {selectedImages.length > 0 && <Reaction />}
-        <DeleteImage selectedImages={selectedImages} />
+        {images.length > 0 && <Reaction />}
+        <DeleteImage
+          selectedImages={selectedImages}
+          handleDeletedImages={handleDeletedImages}
+        />
       </div>
 
       {isCurrentUserAlbumOwner && <Upload onDrop={onDrop} />}
