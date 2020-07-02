@@ -21,5 +21,9 @@ namespace Picturinho.Entities
         public Role Role { get; set; }
 
         public ICollection<Album> Albums { get; set; } = new List<Album>();
+
+        public ICollection<UserLike> Likes { get; set; } = new List<UserLike>();
+
+        public ICollection<UserLove> Loves { get; set; } = new List<UserLove>();
     }
 }

@@ -42,6 +42,14 @@
     <Compile Remove="Migrations\20200624112835_ImageEntity.Designer.cs" />
     <Compile Remove="Migrations\20200629124857_RoleEntity.cs" />
     <Compile Remove="Migrations\20200629124857_RoleEntity.Designer.cs" />
+    <Compile Remove="Migrations\20200702170004_ReactionsEntities.cs" />
+    <Compile Remove="Migrations\20200702170004_ReactionsEntities.Designer.cs" />
+    <Compile Remove="Migrations\20200702170225_ReactionsEntities.cs" />
+    <Compile Remove="Migrations\20200702170225_ReactionsEntities.Designer.cs" />
+    <Compile Remove="Migrations\20200702170853_ReactionsEntities.cs" />
+    <Compile Remove="Migrations\20200702170853_ReactionsEntities.Designer.cs" />
+    <Compile Remove="Migrations\20200702171326_ReactionsEntities.cs" />
+    <Compile Remove="Migrations\20200702171326_ReactionsEntities.Designer.cs" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

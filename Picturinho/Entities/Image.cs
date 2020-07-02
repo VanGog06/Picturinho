@@ -1,4 +1,6 @@
-﻿namespace Picturinho.Entities
+﻿using System.Collections.Generic;
+
+namespace Picturinho.Entities
 {
     public class Image
     {
