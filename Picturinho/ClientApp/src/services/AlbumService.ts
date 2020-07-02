@@ -64,4 +64,17 @@ export class AlbumService {
 
     return fetch("/api/albums", requestOptions).then(handleResponse);
   }
+
+  public static async deleteAlbum(albumId: number): Promise<void> {
+    const requestOptions: RequestInit = {
+      method: "DELETE",
+    };
+
+    const authenticationHeader = authHeader();
+    if (authenticationHeader) {
+      requestOptions.headers = authenticationHeader;
+    }
+
+    return fetch(`api/albums/${albumId}`, requestOptions).then(handleResponse);
+  }
 }

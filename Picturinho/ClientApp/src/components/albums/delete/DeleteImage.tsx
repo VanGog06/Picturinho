@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 
-import { IDeleteAlbumProps } from './IDeleteAlbumProps';
+import { IDeleteImageProps } from './IDeleteImageProps';
 
-export const DeleteAlbum: React.FC<IDeleteAlbumProps> = ({
+export const DeleteImage: React.FC<IDeleteImageProps> = ({
   selectedImages,
-}: IDeleteAlbumProps): JSX.Element => {
+}: IDeleteImageProps): JSX.Element => {
   return selectedImages.length > 0 ? (
     <Button variant="danger">Delete</Button>
   ) : (

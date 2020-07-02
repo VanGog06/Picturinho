@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -31,6 +31,15 @@ export const Explore: React.FC = (): JSX.Element => {
     })();
   }, [dispatch]);
 
+  const handleRemoveAlbum = useCallback(
+    (albumId: number) => {
+      setAlbums((prevAlbums: AlbumModel[]) =>
+        prevAlbums.filter((a) => a.id !== albumId)
+      );
+    },
+    [setAlbums]
+  );
+
   return (
     <div>
       <h2 className={styles.title}>Explore</h2>
@@ -41,7 +50,11 @@ export const Explore: React.FC = (): JSX.Element => {
       ) : (
         <div className={styles.albums}>
           {albums.map((album: AlbumModel) => (
-            <Album key={album.name} album={album} />
+            <Album
+              key={album.name}
+              album={album}
+              handleRemoveAlbum={handleRemoveAlbum}
+            />
           ))}
         </div>
       )}

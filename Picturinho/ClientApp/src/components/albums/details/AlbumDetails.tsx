@@ -13,7 +13,7 @@ import { UserModel } from '../../../models/user/UserModel';
 import { AlbumService } from '../../../services/AlbumService';
 import { ImageService } from '../../../services/ImageService';
 import { AlertActions, alertError } from '../../../store/alert/AlertActions';
-import { DeleteAlbum } from '../delete/DeleteAlbum';
+import { DeleteImage } from '../delete/DeleteImage';
 import { Reaction } from '../reaction/Reaction';
 import { Upload } from '../upload/Upload';
 import styles from './AlbumDetails.module.scss';
@@ -167,8 +167,8 @@ export const AlbumDetails: React.FC = (): JSX.Element => {
       </div>
 
       <div className={styles.details__actions}>
-        <Reaction />
-        <DeleteAlbum selectedImages={selectedImages} />
+        {selectedImages.length > 0 && <Reaction />}
+        <DeleteImage selectedImages={selectedImages} />
       </div>
 
       {isCurrentUserAlbumOwner && <Upload onDrop={onDrop} />}

@@ -64,8 +64,8 @@ namespace Picturinho.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<ActionResult> DeleteAsync([FromBody] int albumId)
+        [HttpDelete("{albumId:int}")]
+        public async Task<ActionResult> DeleteAsync([FromRoute] int albumId)
         {
             await albumService.DeleteAlbumAsync(albumId);
 

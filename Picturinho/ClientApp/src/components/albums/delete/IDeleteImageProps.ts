@@ -1,5 +1,5 @@
 import { ImageModel } from '../../../models/image/ImageModel';
 
-export interface IDeleteAlbumProps {
+export interface IDeleteImageProps {
   selectedImages: ImageModel[];
 }
