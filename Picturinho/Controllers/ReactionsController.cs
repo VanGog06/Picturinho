@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Picturinho.Models.Reaction;
 using Picturinho.Services.Contracts;
 using System.Threading.Tasks;
 
@@ -18,25 +19,29 @@ namespace Picturinho.Controllers
         }
 
         [HttpGet("likes/{albumId:int}")]
-        public async Task<ActionResult<int>> GetAlbumLikesAsync([FromRoute] int albumId)
+        public async Task<ActionResult<TotalReactionsModel>> GetAlbumLikesAsync([FromRoute] int albumId)
         {
-            int likesCount = await reactionsService.GetLikesAsync(albumId);
+            TotalReactionsModel reactions = await reactionsService.GetLikesAsync(albumId);
 
-            return Ok(likesCount);
+            return Ok(reactions);
         }
 
         [HttpPost("like/{albumId:int}")]
-        public async Task<ActionResult<int>> LikeAsync([FromRoute] int albumId)
+        public async Task<ActionResult<TotalReactionsModel>> LikeAsync([FromRoute] int albumId)
         {
-            int likesCount = await reactionsService.LikeAsync(albumId);
+            await reactionsService.LikeAsync(albumId);
+            TotalReactionsModel reactions = await reactionsService.GetLikesAsync(albumId);
 
-            return Ok(likesCount);
+            return Ok(reactions);
         }
 
         [HttpPost("love/{albumId:int}")]
-        public async Task<ActionResult> LoveAsync([FromRoute] int albumId)
+        public async Task<ActionResult<TotalReactionsModel>> LoveAsync([FromRoute] int albumId)
         {
-            return Ok();
+            await reactionsService.LoveAsync(albumId);
+            TotalReactionsModel reactions = await reactionsService.GetLikesAsync(albumId);
+
+            return Ok(reactions);
         }
     }
 }

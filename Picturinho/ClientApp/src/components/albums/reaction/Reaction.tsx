@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { TotalReactionsModel } from '../../../models/reaction/TotalReactionsModel';
 import { ReactionService } from '../../../services/ReactionService';
 import { AlertActions, alertError } from '../../../store/alert/AlertActions';
 import { IReactionProps } from './IReactionProps';
@@ -13,13 +14,18 @@ export const Reaction: React.FC<IReactionProps> = ({
 }: IReactionProps): JSX.Element => {
   const dispatch = useDispatch<Dispatch<AlertActions>>();
 
-  const [likesCount, setLikesCount] = useState<number>(0);
+  const [reactions, setReactions] = useState<TotalReactionsModel>({
+    likes: 0,
+    loves: 0,
+  });
 
   useEffect(() => {
     (async () => {
       try {
-        const newLikesCount: number = await ReactionService.getLikes(albumId);
-        setLikesCount(newLikesCount);
+        const newReactionsCount: TotalReactionsModel = await ReactionService.getReactions(
+          albumId
+        );
+        setReactions(newReactionsCount);
       } catch (error) {
         dispatch(alertError(error.message));
       }
@@ -28,12 +34,25 @@ export const Reaction: React.FC<IReactionProps> = ({
 
   const like = useCallback(async () => {
     try {
-      const newLikesCount: number = await ReactionService.like(albumId);
-      setLikesCount(newLikesCount);
+      const newReactionsCount: TotalReactionsModel = await ReactionService.like(
+        albumId
+      );
+      setReactions(newReactionsCount);
     } catch (error) {
       dispatch(alertError(error.message));
     }
-  }, [albumId, setLikesCount]);
+  }, [albumId, setReactions]);
+
+  const love = useCallback(async () => {
+    try {
+      const newReactionsCount: TotalReactionsModel = await ReactionService.love(
+        albumId
+      );
+      setReactions(newReactionsCount);
+    } catch (error) {
+      dispatch(alertError(error.message));
+    }
+  }, [albumId, setReactions]);
 
   return (
     <div className={styles.reaction}>
@@ -42,13 +61,17 @@ export const Reaction: React.FC<IReactionProps> = ({
         icon="thumbs-up"
         onClick={like}
       />
-      {likesCount > 0 && (
-        <span className={styles.reaction__count}>{likesCount}</span>
-      )}
+      <span className={styles.reaction__count}>
+        {reactions.likes > 0 ? reactions.likes : ""}
+      </span>
       <MDBIcon
         className={`${styles.reaction__icon} ${styles.reaction__love}`}
         icon="heart"
+        onClick={love}
       />
+      <span className={styles.reaction__count}>
+        {reactions.loves > 0 ? reactions.loves : ""}
+      </span>
     </div>
   );
 };

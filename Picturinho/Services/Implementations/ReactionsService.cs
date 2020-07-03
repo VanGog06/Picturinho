@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Picturinho.Entities;
 using Picturinho.Helpers;
+using Picturinho.Models.Reaction;
 using Picturinho.Services.Contracts;
 using System;
 using System.Collections.Generic;
@@ -25,24 +26,45 @@ namespace Picturinho.Services.Implementations
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<int> GetLikesAsync(int albumId)
+        public async Task<TotalReactionsModel> GetLikesAsync(int albumId)
         {
             this.logger.LogInformation($"Retriving the total number of likes for {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
             Album album = await db.Albums
                 .Include(a => a.Likes)
+                .Include(a => a.Loves)
                 .FirstOrDefaultAsync(a => a.Id == albumId);
 
             if (album == null)
             {
-                return 0;
+                return new TotalReactionsModel
+                {
+                    Likes = 0,
+                    Loves = 0
+                };
             }
 
-            return album.Likes.Count;
+            return new TotalReactionsModel
+            {
+                Likes = album.Likes.Count,
+                Loves = album.Loves.Count
+            };
         }
 
-        public async Task<int> LikeAsync(int albumId)
+        public async Task LikeAsync(int albumId)
         {
             int userId = int.Parse(httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Name).Value);
+
+            this.logger.LogInformation($"Checking to see if {nameof(User)} with {nameof(User.Id)} = {userId} already loved {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+            UserLove alreadyExistingLove = await db.UserLoves
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.AlbumId == albumId);
+
+            if (alreadyExistingLove != null)
+            {
+                this.logger.LogInformation($"{nameof(User)} with {nameof(User.Id)} already reacted to {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+                db.UserLoves.Remove(alreadyExistingLove);
+                await db.SaveChangesAsync();
+            }
 
             this.logger.LogInformation($"Checking to see if {nameof(User)} with {nameof(User.Id)} = {userId} already liked {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
             UserLike alreadyExistingLike = await db.UserLikes
@@ -61,8 +83,41 @@ namespace Picturinho.Services.Implementations
                 await db.UserLikes.AddAsync(like);
                 await db.SaveChangesAsync();
             }
+        }
 
-            return await this.GetLikesAsync(albumId);
+        public async Task LoveAsync(int albumId)
+        {
+            int userId = int.Parse(httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.Name).Value);
+
+            this.logger.LogInformation($"Checking to see if {nameof(User)} with {nameof(User.Id)} = {userId} already liked {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+            UserLike alreadyExistingLike = await db.UserLikes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.AlbumId == albumId);
+
+            if (alreadyExistingLike != null)
+            {
+                this.logger.LogInformation($"{nameof(User)} with {nameof(User.Id)} already reacted to {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+                db.UserLikes.Remove(alreadyExistingLike);
+                await db.SaveChangesAsync();
+            }
+
+            this.logger.LogInformation($"Checking to see if {nameof(User)} with {nameof(User.Id)} = {userId} already loved {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+            UserLove alreadyExistingLove = await db.UserLoves
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.AlbumId == albumId);
+
+            if (alreadyExistingLove == null)
+            {
+                this.logger.LogInformation($"{nameof(User)} with {nameof(User.Id)} = {userId} loved {nameof(Album)} with {nameof(Album.Id)} = {albumId}");
+                UserLove love = new UserLove
+                {
+                    AlbumId = albumId,
+                    UserId = userId
+                };
+
+                await db.UserLoves.AddAsync(love);
+                await db.SaveChangesAsync();
+            }
         }
     }
 }
