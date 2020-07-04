@@ -14,7 +14,7 @@ export class UserService {
       body: JSON.stringify({ username, password }),
     };
 
-    return fetch("api/users/authenticate", requestOptions)
+    return fetch("/api/users/authenticate", requestOptions)
       .then(handleResponse)
       .then((user) => {
         // store user details and jwt token in local storage to keep user logged in between page refreshes
@@ -31,7 +31,7 @@ export class UserService {
       body: JSON.stringify(user),
     };
 
-    return fetch("api/users/register", requestOptions).then(handleResponse);
+    return fetch("/api/users/register", requestOptions).then(handleResponse);
   }
 
   public static logout(): void {
@@ -48,7 +48,7 @@ export class UserService {
       requestOptions.headers = authenticationHeader;
     }
 
-    return fetch("api/users", requestOptions).then(handleResponse);
+    return fetch("/api/users", requestOptions).then(handleResponse);
   }
 
   public static async deleteUser(id: number): Promise<void> {
@@ -61,6 +61,6 @@ export class UserService {
       requestOptions.headers = authenticationHeader;
     }
 
-    return fetch(`api/users/${id}`, requestOptions).then(handleResponse);
+    return fetch(`/api/users/${id}`, requestOptions).then(handleResponse);
   }
 }

@@ -5,7 +5,6 @@ using Picturinho.Entities;
 using Picturinho.Helpers;
 using Picturinho.Models.Reaction;
 using Picturinho.Services.Contracts;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -118,6 +117,24 @@ namespace Picturinho.Services.Implementations
                 await db.UserLoves.AddAsync(love);
                 await db.SaveChangesAsync();
             }
+        }
+
+        public async Task DeleteUserLikesAsync(int userId)
+        {
+            this.logger.LogInformation($"Retrieving {nameof(UserLike)} for {nameof(User)} with {nameof(User.Id)} = {userId}");
+            IEnumerable<UserLike> userLikes = db.UserLikes.Where(ul => ul.UserId == userId).ToList();
+
+            db.UserLikes.RemoveRange(userLikes);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task DeleteUserLovesAsync(int userId)
+        {
+            this.logger.LogInformation($"Retrieving {nameof(UserLove)} for {nameof(User)} with {nameof(User.Id)} = {userId}");
+            IEnumerable<UserLove> userLoves = db.UserLoves.Where(ul => ul.UserId == userId).ToList();
+
+            db.UserLoves.RemoveRange(userLoves);
+            await db.SaveChangesAsync();
         }
     }
 }

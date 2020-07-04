@@ -5,6 +5,7 @@ import { Alert } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 
+import { Users } from './components/admin/users/Users';
 import { Albums } from './components/albums/Albums';
 import { CreateAlbum } from './components/albums/create/CreateAlbum';
 import { AlbumDetails } from './components/albums/details/AlbumDetails';
@@ -37,6 +38,7 @@ function App() {
               <PrivateRoute path="/albums/:id" component={AlbumDetails} />
               <PrivateRoute path="/albums" component={Albums} />
               <PrivateRoute path="/explore" component={Explore} />
+              <PrivateRoute path="/admin/users" component={Users} />
               <Redirect from="*" to="/" />
             </Switch>
           </div>

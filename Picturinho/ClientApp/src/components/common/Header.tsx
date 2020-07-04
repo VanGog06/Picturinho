@@ -3,6 +3,7 @@ import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
+import { ApplicationRole } from '../../models/enums/ApplicationRole';
 import { UserModel } from '../../models/user/UserModel';
 
 export const Header: React.FC = (): JSX.Element => {
@@ -34,6 +35,13 @@ export const Header: React.FC = (): JSX.Element => {
               <Nav.Link as={Link} to="/explore">
                 Explore
               </Nav.Link>
+              {user.role === ApplicationRole.Administrator ? (
+                <NavDropdown title="Admin" id="admin">
+                  <NavDropdown.Item as={Link} to="/admin/users">
+                    Users
+                  </NavDropdown.Item>
+                </NavDropdown>
+              ) : undefined}
             </>
           ) : undefined}
         </Nav>

@@ -18,12 +18,14 @@ namespace Picturinho.Services.Implementations
     public class UserService : IUserService
     {
         private readonly DataContext db;
+        private readonly IReactionsService reactionsService;
         private readonly ILogger logger;
 
-        public UserService(DataContext db, ILogger<UserService> logger)
+        public UserService(DataContext db, ILogger<UserService> logger, IReactionsService reactionsService)
         {
             this.db = db;
             this.logger = logger;
+            this.reactionsService = reactionsService;
         }
 
         public async Task<User> AuthenticateAsync(string username, string password)
@@ -133,6 +135,9 @@ namespace Picturinho.Services.Implementations
 
         public async Task DeleteAsync(int id)
         {
+            await reactionsService.DeleteUserLikesAsync(id);
+            await reactionsService.DeleteUserLovesAsync(id);
+
             User user = await db.Users.FindAsync(id);
             if (user != null)
             {

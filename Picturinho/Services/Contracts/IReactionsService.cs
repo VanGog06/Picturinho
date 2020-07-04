@@ -11,5 +11,9 @@ namespace Picturinho.Services.Contracts
         Task LikeAsync(int albumId);
 
         Task LoveAsync(int albumId);
+
+        Task DeleteUserLikesAsync(int userId);
+
+        Task DeleteUserLovesAsync(int userId);
     }
 }
